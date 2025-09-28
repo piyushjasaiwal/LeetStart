@@ -54,10 +54,9 @@ Whether you're prepping for interviews or sharpening your problem-solving edge, 
 ## 🖼️ Demo
 
 <p align="center">
-  <a href="video/demo_compressed.mp4">
-    <img src="video/thumbnail.png" alt="Watch Demo" width="600" style="border-radius:12px;"/>
-  </a>
+  <img src="demo/demo.gif" alt="LeetStart Demo" width="600" style="border-radius:12px;"/>
 </p>
+
 
 ---
 
