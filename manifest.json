@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "LeetStart",
+  "version": "1.0",
+  "permissions": ["tabs", "sidePanel"],
+  "host_permissions": ["https://leetcode.com/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "action": {
+    "default_icon": "icon.png"
+  }
+}
