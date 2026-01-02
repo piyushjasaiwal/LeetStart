@@ -17,44 +17,52 @@ document.getElementById('startBtn').addEventListener('click', async () => {
 
 async function getLatestContestNumbers() {
   try {
-    const res = await fetch('https://leetcode.com/contest/');
+    const res = await fetch("https://leetcode.com/contest/");
     const html = await res.text();
 
     const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
+    const doc = parser.parseFromString(html, "text/html");
 
-    const links = Array.from(doc.querySelectorAll('a[href^="/contest/"]'));
-    const slugs = links
-      .map(link => link.getAttribute('href'))
-      .filter(href => href.startsWith('/contest/weekly-contest-') || href.startsWith('/contest/biweekly-contest-'))
-      .map(href => href.replace('/contest/', '').replace('/', ''));
+    const nextDataScript = doc.querySelector("#__NEXT_DATA__");
 
-    const latestWeekly = Math.max(
-      ...slugs
-        .filter(slug => slug.startsWith('weekly-contest-'))
-        .map(slug => extractNumber(slug))
-    );
+    if (!nextDataScript) {
+      throw new Error("NEXT_DATA not found");
+    }
 
-    const latestBiweekly = Math.max(
-      ...slugs
-        .filter(slug => slug.startsWith('biweekly-contest-'))
-        .map(slug => extractNumber(slug))
-    );
+    const data = JSON.parse(nextDataScript.textContent);
 
-    console.log('Latest Weekly:', latestWeekly);
-    console.log('Latest Biweekly:', latestBiweekly);
+    const contests =
+      data.props.pageProps.contests ||
+      data.props.pageProps.dehydratedState?.queries
+        ?.flatMap(q => q.state?.data ?? [])
+        ?.flatMap(d => d?.contests ?? []) ||
+      [];
 
-    return { latestWeekly, latestBiweekly };
-  } catch (err) {
-    console.error('Failed to fetch contest numbers:', err);
+    const weekly = contests
+      .filter(c => c.titleSlug?.startsWith("weekly-contest-"))
+      .map(c => extractNumber(c.titleSlug));
+
+    const biweekly = contests
+      .filter(c => c.titleSlug?.startsWith("biweekly-contest-"))
+      .map(c => extractNumber(c.titleSlug));
+
+    if (!weekly.length || !biweekly.length) {
+      throw new Error("Contest lists empty");
+    }
+
     return {
-      latestWeekly: 200,
-      latestBiweekly: 100
+      latestWeekly: Math.max(...weekly),
+      latestBiweekly: Math.max(...biweekly)
+    };
+  } catch (err) {
+    console.error("Failed to fetch contest numbers:", err);
+
+    // Safe fallback
+    return {
+      latestWeekly: 400,
+      latestBiweekly: 130
     };
   }
 }
 
-function extractNumber(slug) {
-  const match = slug.match(/\d+$/);
-  return match ? parseInt(match[0]) : 0;
-}
+
